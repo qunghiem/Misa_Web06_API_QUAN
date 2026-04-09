@@ -6,7 +6,12 @@ using System.Threading.Tasks;
 
 namespace MISA_WEB06.Common.Enums
 {
-    internal class EnumGender
+    /// <summary>
+    /// enum giới tính
+    /// </summary>
+    public enum EnumGender
     {
+        Male = 0,
+        Female = 1,
     }
 }

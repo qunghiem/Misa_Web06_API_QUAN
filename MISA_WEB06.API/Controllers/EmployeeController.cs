@@ -1,12 +1,15 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using MISA_WEB06.BL.Interface;
+using MISA_WEB06.Common.Model;
 
 namespace MISA_WEB06.API.Controllers
 {
-    public class EmployeeController : Controller
+    [Route("api/[controller]")]
+    [ApiController]
+    public class EmployeeController : BaseController<Employee>
     {
-        public IActionResult Index()
+        public EmployeeController(IBaseBL<Employee> baseBL) : base(baseBL)
         {
-            return View();
         }
     }
 }

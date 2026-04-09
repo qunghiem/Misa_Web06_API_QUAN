@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace MISA_WEB06.BL.Interface
 {
-    internal class IBaseBL
+    public interface IBaseBL<T>
     {
+        public Task<IEnumerable<T>> GetAll();
     }
 }

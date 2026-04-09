@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace MISA_WEB06.Common.ProcedureName
 {
-    internal class ProcedureName
+    public static class ProcedureName
     {
+        public static string GetAll = "Proc_{0}_GetAll";
     }
 }

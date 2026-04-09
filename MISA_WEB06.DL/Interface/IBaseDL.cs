@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MISA_WEB06.Common.Base;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,8 @@ using System.Threading.Tasks;
 
 namespace MISA_WEB06.DL.Interface
 {
-    internal class IBaseDL
+    public interface IBaseDL<T>
     {
+        public Task<IEnumerable<T>> GetAll();
     }
 }

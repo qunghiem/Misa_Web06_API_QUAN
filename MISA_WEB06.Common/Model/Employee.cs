@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MISA_WEB06.Common.Base;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,42 @@ using System.Threading.Tasks;
 
 namespace MISA_WEB06.Common.Model
 {
-    internal class Employee
+    public class Employee : BaseModel
     {
+        /// <summary>
+        /// ID nhân viên
+        /// </summary>
+        public Guid EmployeeId { get; set; }
+
+        /// <summary>
+        /// Mã nhân viên
+        /// </summary>
+        public string EmployeeCode { get; set; }
+
+        /// <summary>
+        /// Tên nhân viên
+        /// </summary>
+        public string EmployeeName { get; set; }
+
+        /// <summary>
+        /// Constructor mặc định
+        /// </summary>
+        public Employee()
+        {
+
+        }
+
+        /// <summary>
+        /// Constructor có tham số
+        /// </summary>
+        /// <param name="employeeId"></param>
+        /// <param name="employeeCode"></param>
+        /// <param name="employeeName"></param>
+        public Employee(Guid employeeId, string employeeCode, string employeeName)
+        {
+            EmployeeId = employeeId;
+            EmployeeCode = employeeCode;
+            EmployeeName = employeeName;
+        }
     }
 }

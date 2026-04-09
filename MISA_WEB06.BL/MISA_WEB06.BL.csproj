@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\MISA_WEB06.Common\MISA_WEB06.Common.csproj" />
+    <ProjectReference Include="..\MISA_WEB06.DL\MISA_WEB06.DL.csproj" />
+  </ItemGroup>
+
 </Project>
