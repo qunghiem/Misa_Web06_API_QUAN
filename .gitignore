@@ -1,0 +1,12 @@
+# Visual Studio diễn tiến và tệp tạm
+.vs/
+[Bb]in/
+[Oo]bj/
+*.user
+*.userosscache
+*.sln.docstates
+
+# Tệp build kết quả
+*.exe
+*.dll
+*.pdb
