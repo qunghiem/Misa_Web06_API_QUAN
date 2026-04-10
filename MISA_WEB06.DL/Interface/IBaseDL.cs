@@ -10,5 +10,7 @@ namespace MISA_WEB06.DL.Interface
     public interface IBaseDL<T>
     {
         public Task<IEnumerable<T>> GetAll();
+
+        public Task<T> GetById(Guid Id);
     }
 }
