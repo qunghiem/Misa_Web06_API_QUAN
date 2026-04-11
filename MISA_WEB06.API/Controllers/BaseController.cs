@@ -29,12 +29,12 @@ namespace MISA_WEB06.API.Controllers
             }
         }
 
-        [HttpGet("{employeeId}")]
-        public async Task<IActionResult> GetById(Guid employeeId)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById([FromRoute]  Guid id)
         {
             try
             {
-                var res = await _baseBL.GetById(employeeId);
+                var res = await _baseBL.GetById(id);
                 if (res != null)
                 {
                     return Ok(res);
@@ -48,7 +48,7 @@ namespace MISA_WEB06.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Insert(T entity)
+        public async Task<IActionResult> Insert([FromBody]  T entity)
         {
             try
             {
@@ -66,7 +66,7 @@ namespace MISA_WEB06.API.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> Update(T entity)
+        public async Task<IActionResult> Update([FromBody]  T entity)
         {
             try
             {
@@ -83,12 +83,30 @@ namespace MISA_WEB06.API.Controllers
             }
         }
 
-        [HttpDelete("{employeeId}")]
-        public async Task<IActionResult> DeleteById(Guid employeeId)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteById([FromRoute]  Guid id)
         {
             try
             {
-                var res = await _baseBL.DeleteById(employeeId);
+                var res = await _baseBL.DeleteById(id);
+                if (res > 0)
+                {
+                    return Ok(res);
+                }
+                return NotFound();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> DeleteMultiple([FromBody] List<Guid> ids)
+        {
+            try
+            {
+                var res = await _baseBL.DeleteMultiple(ids);
                 if (res > 0)
                 {
                     return Ok(res);

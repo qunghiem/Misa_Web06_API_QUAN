@@ -27,7 +27,11 @@ namespace MISA_WEB06.BL.Interface
 
 
         #region Xóa bản ghi theo ID
-        public Task<int> DeleteById(Guid id); 
+        public Task<int> DeleteById(Guid id);
+        #endregion
+
+        #region Xóa nhiều bản ghi
+        public Task<int> DeleteMultiple(List<Guid> ids);
         #endregion
     }
 }

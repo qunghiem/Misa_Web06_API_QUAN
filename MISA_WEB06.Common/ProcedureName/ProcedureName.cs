@@ -32,5 +32,7 @@ namespace MISA_WEB06.Common.ProcedureName
         /// Xóa 1 bản ghi
         /// </summary>
         public static string Delete = "Proc_{0}_Delete";
+
+        public static string DeleteMultiple = "Proc_{0}_DeleteMultiple";
     }
 }

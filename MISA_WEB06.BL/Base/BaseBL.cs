@@ -46,5 +46,11 @@ namespace MISA_WEB06.BL.Base
             var res = _baseDL.DeleteById(Id);
             return res;
         }
+
+        public Task<int> DeleteMultiple(List<Guid> ids)
+        {
+            var res = _baseDL.DeleteMultiple(ids);
+            return res;
+        }
     }
 }

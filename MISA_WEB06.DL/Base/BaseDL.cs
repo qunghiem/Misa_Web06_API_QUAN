@@ -103,6 +103,7 @@ namespace MISA_WEB06.DL.Base
         }
         #endregion
 
+        #region Xỏa bản ghi theo ID
         public async Task<int> DeleteById(Guid Id)
         {
             string className = typeof(T).Name;
@@ -111,6 +112,25 @@ namespace MISA_WEB06.DL.Base
             var param = new DynamicParameters();
             param.Add($"p_{className}Id", Id);
 
+            using (var cnn = new MySqlConnection(connectionString))
+            {
+                var res = await cnn.ExecuteAsync(
+                    storedProcedure,
+                    param,
+                    commandType: CommandType.StoredProcedure
+                );
+                return res;
+            }
+        }
+        #endregion
+
+        public async Task<int> DeleteMultiple(List<Guid> ids)
+        {
+            string className = typeof(T).Name;
+            string storedProcedure = string.Format(ProcedureName.DeleteMultiple, className);
+
+            var param = new DynamicParameters();
+            param.Add($"p_{className}Ids", string.Join(",", ids));
             using (var cnn = new MySqlConnection(connectionString))
             {
                 var res = await cnn.ExecuteAsync(
