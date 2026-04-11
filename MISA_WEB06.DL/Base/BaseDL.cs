@@ -30,29 +30,96 @@ namespace MISA_WEB06.DL.Base
 
 
         #region Lấy bản ghi theo ID
-        //public async Task<T> GetById(Guid Id)
-        //{
-        //    string storedProcedure = string.Format(ProcedureName.GetById, typeof(T).Name);
-        //    using (var cnn = new MySqlConnection(connectionString))
-        //    {
-        //        var res = await cnn.QueryAsync<T>(storedProcedure, commandType: CommandType.StoredProcedure);
-        //        return res;
-        //    }
-        //}
-        #endregion
-
-        public async Task<T> GetByID(Guid Id)
+        public async Task<T> GetById(Guid Id)
         {
             string className = typeof(T).Name;
-            string storeProcedure = string.Format(ProcedureName.GetById, typeof(BaseModel).Name);
+            // chuẩn bị tên stored procedure
+            string storedProcedure = string.Format(ProcedureName.GetById, className);
+
+            // chuẩn bị tham số param
             var param = new DynamicParameters();
+
             param.Add($"p_{className}Id", Id);
+
             using (var cnn = new MySqlConnection(connectionString))
             {
-                var res = await cnn.QueryFirstOrDefaultAsync<T>(storeProcedure, param, commandType: CommandType.StoredProcedure);
+                var res = await cnn.QueryFirstOrDefaultAsync<T>(
+                    storedProcedure,
+                    param,
+                    commandType: CommandType.StoredProcedure
+                );
                 return res;
             }
         }
+        #endregion
 
+        #region Thêm bản ghi
+        public async Task<int> Insert(T entity)
+        {
+            string className = typeof(T).Name;
+            string storedProcedure = string.Format(ProcedureName.Insert, className);
+
+            var param = new DynamicParameters();
+
+            var listProps = typeof(T).GetProperties();
+            foreach (var prop in listProps)
+            {
+                param.Add($"p_{prop.Name}", prop.GetValue(entity));
+            }
+
+            using (var cnn = new MySqlConnection(connectionString))
+            {
+                var res = await cnn.ExecuteAsync(
+                    storedProcedure,
+                    param,
+                    commandType: CommandType.StoredProcedure
+                );
+                return res;
+            }
+        }
+        #endregion
+
+        #region Sửa bản ghi
+        public async Task<int> Update(T entity)
+        {
+            string className = typeof(T).Name;
+            string storedProcedure = string.Format(ProcedureName.Update, className);
+
+            var param = new DynamicParameters();
+            var listProps = typeof(T).GetProperties();
+            foreach (var prop in listProps)
+            {
+                param.Add($"p_{prop.Name}", prop.GetValue(entity));
+            }
+            using (var cnn = new MySqlConnection(connectionString))
+            {
+                var res = await cnn.ExecuteAsync(
+                    storedProcedure,
+                    param,
+                    commandType: CommandType.StoredProcedure
+                );
+                return res;
+            }
+        }
+        #endregion
+
+        public async Task<int> DeleteById(Guid Id)
+        {
+            string className = typeof(T).Name;
+            string storedProcedure = string.Format(ProcedureName.Delete, className);
+
+            var param = new DynamicParameters();
+            param.Add($"p_{className}Id", Id);
+
+            using (var cnn = new MySqlConnection(connectionString))
+            {
+                var res = await cnn.ExecuteAsync(
+                    storedProcedure,
+                    param,
+                    commandType: CommandType.StoredProcedure
+                );
+                return res;
+            }
+        }
     }
 }

@@ -22,5 +22,29 @@ namespace MISA_WEB06.BL.Base
             var res = _baseDL.GetAll();
             return res;
         }
+
+        public Task<T> GetById(Guid Id)
+        {
+            var res = _baseDL.GetById(Id);
+            return res;
+        }
+
+        public Task<int> Insert(T entity)
+        {
+            var res = _baseDL.Insert(entity);
+            return res;
+        }
+
+        public Task<int> Update(T entity)
+        {
+            var res = _baseDL.Update(entity);
+            return res;
+        }
+
+        public Task<int> DeleteById(Guid Id)
+        {
+            var res = _baseDL.DeleteById(Id);
+            return res;
+        }
     }
 }

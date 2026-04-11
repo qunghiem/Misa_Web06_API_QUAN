@@ -1,7 +1,9 @@
 ﻿using MISA_WEB06.Common.Base;
+using MISA_WEB06.Common.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -27,6 +29,8 @@ namespace MISA_WEB06.Common.Model
         /// <summary>
         /// Constructor mặc định
         /// </summary>
+        /// 
+        public EnumGender? Gender { get; set; }
         public Employee()
         {
 

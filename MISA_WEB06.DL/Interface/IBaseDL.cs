@@ -12,5 +12,11 @@ namespace MISA_WEB06.DL.Interface
         public Task<IEnumerable<T>> GetAll();
 
         public Task<T> GetById(Guid Id);
+
+        public Task<int> Insert(T entity);
+
+        public Task<int> Update(T entity);
+
+        public Task<int> DeleteById(Guid Id);
     }
 }

@@ -4,7 +4,7 @@ using MISA_WEB06.Common.Model;
 
 namespace MISA_WEB06.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/[controller]")]
     [ApiController]
     public class EmployeeController : BaseController<Employee>
     {
