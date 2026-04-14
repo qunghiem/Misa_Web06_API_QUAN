@@ -19,7 +19,7 @@ namespace MISA_WEB06.Common.Base
         /// <summary>
         /// Người tạo
         /// </summary>
-        public string CreatedBy { get; set; }
+        public string? CreatedBy { get; set; }
         
         /// <summary>
         /// Ngày sửa đổi gần nhất
@@ -29,6 +29,6 @@ namespace MISA_WEB06.Common.Base
         /// <summary>
         /// Người sửa đổi gần nhất
         /// </summary>
-        public string ModifiedBy { get; set; }
+        public string? ModifiedBy { get; set; }
     }
 }

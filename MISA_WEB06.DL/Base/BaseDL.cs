@@ -5,6 +5,7 @@ using MISA_WEB06.DL.Interface;
 using MySqlConnector;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Linq;
 using System.Text;
@@ -124,6 +125,7 @@ namespace MISA_WEB06.DL.Base
         }
         #endregion
 
+        #region Xóa nhiều bản ghi
         public async Task<int> DeleteMultiple(List<Guid> ids)
         {
             string className = typeof(T).Name;
@@ -139,6 +141,58 @@ namespace MISA_WEB06.DL.Base
                     commandType: CommandType.StoredProcedure
                 );
                 return res;
+            }
+        }
+        #endregion
+
+
+        /// <summary>
+        /// Check xem có bị trùng hay không
+        /// </summary>
+        /// <param name="propertyName"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public async Task<bool> CheckDuplicate(string propertyName, object value, T entity)
+        {
+            string className = typeof(T).Name;
+            string storedProcedure = string.Format(ProcedureName.CheckDuplicate, className);
+
+            var param = new DynamicParameters();
+            // Lấy ra thuộc tính là khóa chính của T
+            var primaryKeyName = "";
+            object primaryKeyValue = null;
+            // danh sach thuoc tinh cua T
+            var listProps = typeof(T).GetProperties();
+            foreach (var prop in listProps)
+            {
+                // kiểm tra xem prop có phải là khóa chính hay không
+                var isPrimaryKey = Attribute.IsDefined(prop, typeof(KeyAttribute));
+                if (isPrimaryKey)
+                {
+                    primaryKeyName = prop.Name;
+                    primaryKeyValue = prop.GetValue(entity);
+                    break;
+                }
+            }
+            param.Add($"p_{propertyName}", value);
+
+            // truyền thêm khóa chính vào param nếu có
+            if(string.IsNullOrEmpty(primaryKeyName))
+            {
+                throw new Exception($"Không tìm thấy khóa chính");
+            } else
+            {
+                param.Add($"p_{primaryKeyName}", primaryKeyValue);
+            }
+
+            using (var cnn = new MySqlConnection(connectionString))
+            {
+                var res = await cnn.QueryFirstOrDefaultAsync<int>(
+                    storedProcedure,
+                    param,
+                    commandType: CommandType.StoredProcedure
+                );
+                return res > 0;
             }
         }
     }

@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using MISA.WEB26.Common.Resources;
 using MISA_WEB06.BL.Interface;
+using MISA_WEB06.Common.Model;
 
 namespace MISA_WEB06.API.Controllers
 {
@@ -14,6 +16,10 @@ namespace MISA_WEB06.API.Controllers
             _baseBL = baseBL;
         }
 
+        /// <summary>
+        /// Lấy tất cả bản ghi
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -29,6 +35,11 @@ namespace MISA_WEB06.API.Controllers
             }
         }
 
+        /// <summary>
+        /// Lấy bản ghi theo id
+        /// </summary
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById([FromRoute]  Guid id)
         {
@@ -46,7 +57,11 @@ namespace MISA_WEB06.API.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
-
+        /// <summary>
+        /// Thêm bản ghi
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<IActionResult> Insert([FromBody]  T entity)
         {
@@ -55,16 +70,28 @@ namespace MISA_WEB06.API.Controllers
                 var res = await _baseBL.Insert(entity);
                 if (res > 0)
                 {
-                    return Ok(res);
+                    return Ok($"Thêm bản ghi thành công cho bảng {entity}");
+                    //return Ok(res);
                 }
                 return BadRequest();
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+
+                return StatusCode(500, new ErrorResult()
+                {
+                    DevMsg = ex.Message,
+                    UserMsg = ResourceVN.Exception,
+                    MoreInfo = ex.Data
+                });
             }
         }
 
+        /// <summary>
+        /// Sửa bản ghi
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
         [HttpPut]
         public async Task<IActionResult> Update([FromBody]  T entity)
         {
@@ -79,10 +106,20 @@ namespace MISA_WEB06.API.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new ErrorResult()
+                {
+                    DevMsg = ex.Message,
+                    UserMsg = ResourceVN.Exception,
+                    MoreInfo = ex.Data
+                });
             }
         }
 
+        /// <summary>
+        /// Xóa bản ghi theo ID
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteById([FromRoute]  Guid id)
         {
@@ -100,7 +137,11 @@ namespace MISA_WEB06.API.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
-
+        /// <summary>
+        /// Xóa nhiều bản ghi
+        /// </summary>
+        /// <param name="ids"></param>
+        /// <returns></returns>
         [HttpDelete]
         public async Task<IActionResult> DeleteMultiple([FromBody] List<Guid> ids)
         {

@@ -20,5 +20,7 @@ namespace MISA_WEB06.DL.Interface
         public Task<int> DeleteById(Guid Id);
 
         public Task<int> DeleteMultiple(List<Guid> ids);
+
+        public Task<bool> CheckDuplicate(string propertyName, object value, T entity);
     }
 }

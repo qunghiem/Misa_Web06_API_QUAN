@@ -13,8 +13,9 @@ namespace MISA_WEB06.BL.Service
 {
     public class EmployeeBL : BaseBL<Employee>, IEmployeeBL
     {
-        public EmployeeBL(BaseDL<Employee> baseDL) : base(baseDL)
+        public EmployeeBL(IBaseDL<Employee> baseDL) : base(baseDL)
         {
         }
     }
 }
+ 

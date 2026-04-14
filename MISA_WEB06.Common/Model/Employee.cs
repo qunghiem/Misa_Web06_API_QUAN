@@ -1,7 +1,9 @@
-﻿using MISA_WEB06.Common.Base;
+﻿using MISA_WEB06.Common.Attribute;
+using MISA_WEB06.Common.Base;
 using MISA_WEB06.Common.Enums;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -14,23 +16,29 @@ namespace MISA_WEB06.Common.Model
         /// <summary>
         /// ID nhân viên
         /// </summary>
+        [Key]
         public Guid EmployeeId { get; set; }
 
         /// <summary>
         /// Mã nhân viên
         /// </summary>
+        [CheckDuplicate("Mã nhân viên đã bị trùng")] // Custom attribute để kiểm tra trùng lặp mã nhân viên
         public string EmployeeCode { get; set; }
 
         /// <summary>
         /// Tên nhân viên
         /// </summary>
         public string EmployeeName { get; set; }
+        /// <summary>
+        /// Giới tính nhân viên
+        /// </summary>
+        public EnumGender? Gender { get; set; }
 
         /// <summary>
         /// Constructor mặc định
         /// </summary>
         /// 
-        public EnumGender? Gender { get; set; }
+
         public Employee()
         {
 
