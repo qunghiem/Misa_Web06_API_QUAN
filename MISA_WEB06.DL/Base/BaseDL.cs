@@ -1,4 +1,6 @@
 ﻿using Dapper;
+using MISA_WEB06.Common;
+using MISA_WEB06.Common.Attribute;
 using MISA_WEB06.Common.Base;
 using MISA_WEB06.Common.Model;
 using MISA_WEB06.Common.ProcedureName;
@@ -196,25 +198,67 @@ namespace MISA_WEB06.DL.Base
             }
         }
 
+        //Cách 1: dùng Procedure để tìm kiếm phân trang
+        //public async Task<PagedResult<T>> Search(string? keyword, int pageIndex, int pageSize)
+        //{
+        //    string className = typeof(T).Name;
+        //    string storedProcedure = string.Format(ProcedureName.Search, className);
+        //    var param = new DynamicParameters();
 
+        //    param.Add("p_Keyword", keyword ?? "");
+        //    param.Add("p_PageNumber", pageIndex);
+        //    param.Add("p_PageSize", pageSize);
+
+        //    using var cnn = new MySqlConnection(connectionString);
+        //    using var multi = await cnn.QueryMultipleAsync(
+        //        storedProcedure,
+        //        param,
+        //        commandType: CommandType.StoredProcedure
+        //    );
+        //    var totalCount = await multi.ReadFirstOrDefaultAsync<int>();
+
+        //    var data = await multi.ReadAsync<T>();
+
+        //    return new PagedResult<T>
+        //    {
+        //        Data = data,
+        //        TotalCount = totalCount,
+        //        PageIndex = pageIndex,
+        //        PageSize = pageSize
+        //    };
+        //}
+
+        //Cách 2: sử dụng Query động 
         public async Task<PagedResult<T>> Search(string? keyword, int pageIndex, int pageSize)
         {
-            string className = typeof(T).Name;
-            string storedProcedure = string.Format(ProcedureName.Search, className);
+            var tableName = typeof(T).Name;
+            // Lấy ra danh sách cột có type là string để search
+            var searchableColumns = typeof(T).GetProperties().Where(p => p.PropertyType == typeof(string)).Select(p => p.Name).ToList();
+            var whereClaude = "";
             var param = new DynamicParameters();
 
-            param.Add("p_Keyword", keyword ?? "");
-            param.Add("p_PageNumber", pageIndex);
-            param.Add("p_PageSize", pageSize);
+            if (!string.IsNullOrWhiteSpace(keyword) && searchableColumns.Any())
+            {
+                var conditions = searchableColumns.Select(col => $"{col} LIKE @keyword");
 
-            using var cnn = new MySqlConnection(connectionString);
+                whereClaude= (string.Join(" OR ", conditions));
+
+                param.Add("keyword", $"%{keyword}%");
+            }
+
+            var offSet = (pageIndex - 1) * pageSize;
+            param.Add("offSet", offSet);
+            param.Add("pageSize", pageSize);
+
+            var sql = @$"SELECT COUNT(*) FROM {tableName} WHERE {whereClaude};
+                        SELECT * FROM {tableName} WHERE {whereClaude} LIMIT @pageSize OFFSET @offSet;";
+
+            using var  cnn = new MySqlConnection(connectionString);
             using var multi = await cnn.QueryMultipleAsync(
-                storedProcedure,
-                param,
-                commandType: CommandType.StoredProcedure
+                sql, param
             );
-            var totalCount = await multi.ReadFirstOrDefaultAsync<int>();
 
+            var totalCount = await multi.ReadFirstOrDefaultAsync<int>();
             var data = await multi.ReadAsync<T>();
 
             return new PagedResult<T>

@@ -25,11 +25,13 @@ BEGIN
     END IF;
     SET v_Offset = (p_PageNumber - 1) * p_PageSize;
     SET p_Keyword = IFNULL(p_Keyword, '');
+
     SELECT COUNT(*) AS TotalCount
     FROM employee
     WHERE p_Keyword = ''
        OR EmployeeCode LIKE CONCAT('%', p_Keyword, '%')
        OR EmployeeName LIKE CONCAT('%', p_Keyword, '%');
+
     SELECT *
     FROM employee
     WHERE p_Keyword = ''
