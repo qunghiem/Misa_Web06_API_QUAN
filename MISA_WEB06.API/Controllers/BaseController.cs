@@ -70,8 +70,9 @@ namespace MISA_WEB06.API.Controllers
                 var res = await _baseBL.Insert(entity);
                 if (res > 0)
                 {
-                    return Ok($"Thêm bản ghi thành công cho bảng {entity}");
-                    //return Ok(res);
+                    //return Ok($"Thêm bản ghi thành công cho bảng {entity}");
+                    return Ok(res);
+                    //return Created();
                 }
                 return BadRequest();
             }
@@ -157,6 +158,34 @@ namespace MISA_WEB06.API.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Tìm kiếm và phân trang
+        /// </summary>
+        /// <param name="keyword">Từ khóa tìm kiếm (để trống = lấy tất cả)</param>
+        /// <param name="pageNumber">Số trang (bắt đầu từ 1)</param>
+        /// <param name="pageSize">Số bản ghi mỗi trang</param>
+        [HttpGet("search")]
+        public async Task<IActionResult> Search(
+            [FromQuery] string? keyword,
+            [FromQuery] int pageNumber= 1,
+            [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                var res = await _baseBL.Search(keyword, pageNumber, pageSize);
+                return Ok(res);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ErrorResult
+                {
+                    DevMsg = ex.Message,
+                    UserMsg = ResourceVN.Exception,
+                    MoreInfo = ex.Data
+                });
             }
         }
     }

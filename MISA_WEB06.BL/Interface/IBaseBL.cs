@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MISA_WEB06.Common.Model;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -32,6 +33,15 @@ namespace MISA_WEB06.BL.Interface
 
         #region Xóa nhiều bản ghi
         public Task<int> DeleteMultiple(List<Guid> ids);
+        #endregion
+
+
+        #region Tìm kiếm
+        public Task<PagedResult<T>> Search(
+           string? keyword,
+           int pageIndex,
+           int pageSize
+       ); 
         #endregion
     }
 }

@@ -8,6 +8,10 @@ namespace MISA_WEB06.API.Controllers
     [ApiController]
     public class EmployeeController : BaseController<Employee>
     {
+        /// <summary>
+        /// Hàm khởi tạo EmployeeController
+        /// </summary>
+        /// <param name="baseBL"></param>
         public EmployeeController(IBaseBL<Employee> baseBL) : base(baseBL)
         {
         }

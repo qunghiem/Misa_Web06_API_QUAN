@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using MISA_WEB06.Common.Base;
+using MISA_WEB06.Common.Model;
 using MISA_WEB06.Common.ProcedureName;
 using MISA_WEB06.DL.Interface;
 using MySqlConnector;
@@ -171,7 +172,6 @@ namespace MISA_WEB06.DL.Base
                 {
                     primaryKeyName = prop.Name;
                     primaryKeyValue = prop.GetValue(entity);
-                    break;
                 }
             }
             param.Add($"p_{propertyName}", value);
@@ -194,6 +194,36 @@ namespace MISA_WEB06.DL.Base
                 );
                 return res > 0;
             }
+        }
+
+
+        public async Task<PagedResult<T>> Search(string? keyword, int pageIndex, int pageSize)
+        {
+            string className = typeof(T).Name;
+            string storedProcedure = string.Format(ProcedureName.Search, className);
+            var param = new DynamicParameters();
+
+            param.Add("p_Keyword", keyword ?? "");
+            param.Add("p_PageNumber", pageIndex);
+            param.Add("p_PageSize", pageSize);
+
+            using var cnn = new MySqlConnection(connectionString);
+            using var multi = await cnn.QueryMultipleAsync(
+                storedProcedure,
+                param,
+                commandType: CommandType.StoredProcedure
+            );
+            var totalCount = await multi.ReadFirstOrDefaultAsync<int>();
+
+            var data = await multi.ReadAsync<T>();
+
+            return new PagedResult<T>
+            {
+                Data = data,
+                TotalCount = totalCount,
+                PageIndex = pageIndex,
+                PageSize = pageSize
+            };
         }
     }
 }

@@ -42,5 +42,8 @@ namespace MISA_WEB06.Common.ProcedureName
         /// Kiểm tra trùng lặp
         /// </summary>
         public static string CheckDuplicate = "Proc_{0}_CheckDuplicate";
+
+        // Tìm kiếm theo trường
+        public static string Search = "Proc_{0}_Search";
     }
 }

@@ -1,5 +1,6 @@
 ﻿using MISA_WEB06.BL.Interface;
 using MISA_WEB06.Common.Attribute;
+using MISA_WEB06.Common.Model;
 using MISA_WEB06.DL.Interface;
 using System;
 using System.Collections.Generic;
@@ -15,7 +16,7 @@ namespace MISA_WEB06.BL.Base
 
         public BaseBL(IBaseDL<T> baseDL) 
         {
-            _baseDL = baseDL;
+            _baseDL = baseDL; // Nhận được và cất vào biến dùng chung
         }
 
         /// <summary>
@@ -146,6 +147,17 @@ namespace MISA_WEB06.BL.Base
         {
             var res = await _baseDL.DeleteMultiple(ids);
             return res;
+        }
+
+        public async Task<PagedResult<T>> Search(string? keyword, int pageIndex, int pageSize)
+        {
+            // bắt đầu từ trang 1
+            if (pageIndex < 1) pageIndex = 1;
+
+            // set page size
+            if(pageSize < 1) pageSize = 10;
+            
+            return await _baseDL.Search(keyword, pageIndex, pageSize);
         }
     }
 }

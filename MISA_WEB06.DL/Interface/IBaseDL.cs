@@ -1,4 +1,5 @@
 ﻿using MISA_WEB06.Common.Base;
+using MISA_WEB06.Common.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,5 +23,7 @@ namespace MISA_WEB06.DL.Interface
         public Task<int> DeleteMultiple(List<Guid> ids);
 
         public Task<bool> CheckDuplicate(string propertyName, object value, T entity);
+
+        public Task<PagedResult<T>> Search(string? keyword, int pageNumber, int  pageIndex); 
     }
 }
