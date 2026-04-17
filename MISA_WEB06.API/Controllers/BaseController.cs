@@ -162,20 +162,22 @@ namespace MISA_WEB06.API.Controllers
         }
 
         /// <summary>
-        /// Tìm kiếm và phân trang
+        /// Tìm kiếm, lọc nâng cao và phân trang
         /// </summary>
-        /// <param name="keyword">Từ khóa tìm kiếm (để trống = lấy tất cả)</param>
-        /// <param name="pageNumber">Số trang (bắt đầu từ 1)</param>
-        /// <param name="pageSize">Số bản ghi mỗi trang</param>
-        [HttpGet("search")]
-        public async Task<IActionResult> Search(
-            [FromQuery] string? keyword,
-            [FromQuery] int pageNumber= 1,
-            [FromQuery] int pageSize = 10)
+        /// <param name="request">Đối tượng chứa từ khóa, phân trang và các bộ lọc</param>
+        [HttpPost("search")]
+        public async Task<IActionResult> Search([FromBody] SearchRequest request)
         {
             try
             {
-                var res = await _baseBL.Search(keyword, pageNumber, pageSize);
+                // Gọi xuống Business Layer với đầy đủ các tham số mới
+                var res = await _baseBL.Search(
+                    request.Keyword,
+                    request.PageIndex,
+                    request.PageSize,
+                    request.Filters
+                );
+
                 return Ok(res);
             }
             catch (Exception ex)

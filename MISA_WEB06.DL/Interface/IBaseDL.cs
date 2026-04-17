@@ -24,6 +24,6 @@ namespace MISA_WEB06.DL.Interface
 
         public Task<bool> CheckDuplicate(string propertyName, object value, T entity);
 
-        public Task<PagedResult<T>> Search(string? keyword, int pageNumber, int  pageIndex); 
+        public Task<PagedResult<T>> Search(string? keyword, int pageNumber, int  pageIndex, List<FilterItem>? filters = null); 
     }
 }

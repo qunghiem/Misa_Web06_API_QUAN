@@ -149,7 +149,7 @@ namespace MISA_WEB06.BL.Base
             return res;
         }
 
-        public async Task<PagedResult<T>> Search(string? keyword, int pageIndex, int pageSize)
+        public async Task<PagedResult<T>> Search(string? keyword, int pageIndex, int pageSize, List<FilterItem>? filters = null)
         {
             // bắt đầu từ trang 1
             if (pageIndex < 1) pageIndex = 1;
@@ -157,7 +157,7 @@ namespace MISA_WEB06.BL.Base
             // set page size
             if(pageSize < 1) pageSize = 10;
             
-            return await _baseDL.Search(keyword, pageIndex, pageSize);
+            return await _baseDL.Search(keyword, pageIndex, pageSize, filters);
         }
     }
 }

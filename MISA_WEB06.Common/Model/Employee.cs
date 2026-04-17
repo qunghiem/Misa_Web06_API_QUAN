@@ -33,6 +33,8 @@ namespace MISA_WEB06.Common.Model
         /// <summary>
         /// Giới tính nhân viên
         /// </summary>
+        /// 
+        public int Age { get; set; }
         public EnumGender? Gender { get; set; }
 
         /// <summary>

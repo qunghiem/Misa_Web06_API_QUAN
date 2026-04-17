@@ -12,6 +12,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace MISA_WEB06.DL.Base
@@ -229,29 +230,49 @@ namespace MISA_WEB06.DL.Base
         //}
 
         //Cách 2: sử dụng Query động 
-        public async Task<PagedResult<T>> Search(string? keyword, int pageIndex, int pageSize)
+        public async Task<PagedResult<T>> Search(string? keyword, int pageIndex, int pageSize, List<FilterItem>? filters = null)
         {
             var tableName = typeof(T).Name;
             // Lấy ra danh sách cột có type là string để search
             var searchableColumns = typeof(T).GetProperties().Where(p => p.PropertyType == typeof(string)).Select(p => p.Name).ToList();
-            var whereClaude = "";
+            var whereClause = "";
             var param = new DynamicParameters();
 
             if (!string.IsNullOrWhiteSpace(keyword) && searchableColumns.Any())
             {
                 var conditions = searchableColumns.Select(col => $"{col} LIKE @keyword");
 
-                whereClaude= (string.Join(" OR ", conditions));
+                whereClause = $"({string.Join(" OR ", conditions)})";
 
-                param.Add("keyword", $"%{keyword}%");
+                //param.Add("keyword", $"%{keyword}%");
+            } else
+            {
+                
+            }
+
+            // Xử lý filter động
+            if (filters != null && filters.Count > 0)
+            {
+                for (int i = 0; i < filters.Count; i++)
+                {
+                    var filter = filters[i];
+                    // Chuyển == thành = cho SQL, các toán tử khác giữ nguyên
+                    string op = filter.Operator == "==" ? "=" : filter.Operator;
+                    string paramName = $"f_param_{i}";
+
+                    object actualValue = GetValueFromJsonElement(filter.Value);
+
+                    whereClause += $" AND {filter.Field} {op} @{paramName}";
+                    //param.Add(paramName, actualValue);
+                }
             }
 
             var offSet = (pageIndex - 1) * pageSize;
             param.Add("offSet", offSet);
             param.Add("pageSize", pageSize);
 
-            var sql = @$"SELECT COUNT(*) FROM {tableName} WHERE {whereClaude};
-                        SELECT * FROM {tableName} WHERE {whereClaude} LIMIT @pageSize OFFSET @offSet;";
+            var sql = @$"SELECT COUNT(*) FROM {tableName} WHERE {whereClause};
+                        SELECT * FROM {tableName} WHERE {whereClause} LIMIT @pageSize OFFSET @offSet;";
 
             using var  cnn = new MySqlConnection(connectionString);
             using var multi = await cnn.QueryMultipleAsync(
@@ -268,6 +289,33 @@ namespace MISA_WEB06.DL.Base
                 PageIndex = pageIndex,
                 PageSize = pageSize
             };
+        }
+
+        // Hàm bổ trợ để xử lý JsonElement
+        private object GetValueFromJsonElement(object value)
+        {
+            if (value is JsonElement element)
+            {
+                switch (element.ValueKind)
+                {
+                    case JsonValueKind.String:
+                        return element.GetString();
+                    case JsonValueKind.Number:
+                        // Tự động nhận diện số nguyên hoặc số thực
+                        if (element.TryGetInt32(out int intVal)) return intVal;
+                        if (element.TryGetInt64(out long longVal)) return longVal;
+                        return element.GetDouble();
+                    case JsonValueKind.True:
+                        return true;
+                    case JsonValueKind.False:
+                        return false;
+                    case JsonValueKind.Null:
+                        return null;
+                    default:
+                        return element.GetRawText();
+                }
+            }
+            return value;
         }
     }
 }

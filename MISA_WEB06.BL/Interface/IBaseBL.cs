@@ -40,7 +40,8 @@ namespace MISA_WEB06.BL.Interface
         public Task<PagedResult<T>> Search(
            string? keyword,
            int pageIndex,
-           int pageSize
+           int pageSize,
+           List<FilterItem>? filters = null
        ); 
         #endregion
     }
