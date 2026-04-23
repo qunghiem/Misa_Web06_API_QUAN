@@ -106,6 +106,17 @@ namespace MISA_WEB06.DL.Base
             string tableName = typeof(T).Name;
             var properties = typeof(T).GetProperties();
 
+            var primaryKeyProp = properties.FirstOrDefault(p => p.Name == $"{tableName}Id");
+            if (primaryKeyProp != null)
+            {
+                var currentValue = primaryKeyProp.GetValue(entity);
+                // Nếu ID đang là Guid trống (toàn số 0), hãy cấp cho nó một Guid mới
+                if (currentValue is Guid guidValue && guidValue == Guid.Empty)
+                {
+                    primaryKeyProp.SetValue(entity, Guid.NewGuid());
+                }
+            }
+
             // 1. Lấy danh sách tên cột (ví dụ: Name, Age, Email)
             var columnNames = properties.Select(p => p.Name);
 
@@ -246,10 +257,52 @@ namespace MISA_WEB06.DL.Base
         /// <returns></returns>
         public async Task<bool> CheckDuplicate(string propertyName, object value, T entity)
         {
-            string className = typeof(T).Name;
-            string storedProcedure = string.Format(ProcedureName.CheckDuplicate, className);
+            //string className = typeof(T).Name;
+            //string storedProcedure = string.Format(ProcedureName.CheckDuplicate, className);
 
-            var param = new DynamicParameters();
+            //var param = new DynamicParameters();
+            //// Lấy ra thuộc tính là khóa chính của T
+            //var primaryKeyName = "";
+            //object primaryKeyValue = null;
+            //// danh sach thuoc tinh cua T
+            //var listProps = typeof(T).GetProperties();
+            //foreach (var prop in listProps)
+            //{
+            //    // kiểm tra xem prop có phải là khóa chính hay không
+            //    var isPrimaryKey = Attribute.IsDefined(prop, typeof(KeyAttribute));
+            //    if (isPrimaryKey)
+            //    {
+            //        primaryKeyName = prop.Name;
+            //        primaryKeyValue = prop.GetValue(entity);
+            //    }
+            //}
+            //param.Add($"p_{propertyName}", value);
+
+            //// truyền thêm khóa chính vào param nếu có
+            //if(string.IsNullOrEmpty(primaryKeyName))
+            //{
+            //    throw new Exception($"Không tìm thấy khóa chính");
+            //} else
+            //{
+            //    param.Add($"p_{primaryKeyName}", primaryKeyValue);
+            //}
+
+            //using (var cnn = new MySqlConnection(connectionString))
+            //{
+            //    var res = await cnn.QueryFirstOrDefaultAsync<int>(
+            //        storedProcedure,
+            //        param,
+            //        commandType: CommandType.StoredProcedure
+            //    );
+            //    return res > 0;
+            //}
+
+            // Cách 2: dùng Dynamic SQL
+            var tableName = typeof(T).Name;
+            var properties = typeof(T).GetProperties();
+            var columnNames = properties.Select(p => p.Name);
+            var paramNames = properties.Select(p => $"@{p.Name}");
+
             // Lấy ra thuộc tính là khóa chính của T
             var primaryKeyName = "";
             object primaryKeyValue = null;
@@ -265,27 +318,22 @@ namespace MISA_WEB06.DL.Base
                     primaryKeyValue = prop.GetValue(entity);
                 }
             }
-            param.Add($"p_{propertyName}", value);
+            var sql = $@"SELECT COUNT(*) 
+                      FROM {tableName} 
+                      WHERE {propertyName} = @Value
+                      AND {primaryKeyName} <> @Id;";
 
-            // truyền thêm khóa chính vào param nếu có
-            if(string.IsNullOrEmpty(primaryKeyName))
+            using (var cnn = new MySqlConnection(connectionString)) 
             {
-                throw new Exception($"Không tìm thấy khóa chính");
-            } else
-            {
-                param.Add($"p_{primaryKeyName}", primaryKeyValue);
-            }
+                var res = await cnn.ExecuteScalarAsync<int>(
+                    sql, 
+                    new { Value = value, Id = primaryKeyValue });
 
-            using (var cnn = new MySqlConnection(connectionString))
-            {
-                var res = await cnn.QueryFirstOrDefaultAsync<int>(
-                    storedProcedure,
-                    param,
-                    commandType: CommandType.StoredProcedure
-                );
                 return res > 0;
             }
         }
+
+
 
         //Cách 1: dùng Procedure để tìm kiếm phân trang
         //public async Task<PagedResult<T>> Search(string? keyword, int pageIndex, int pageSize)
@@ -323,44 +371,35 @@ namespace MISA_WEB06.DL.Base
             var tableName = typeof(T).Name;
             // Lấy ra danh sách cột có type là string để search
             var searchableColumns = typeof(T).GetProperties().Where(p => p.PropertyType == typeof(string)).Select(p => p.Name).ToList();
-            var whereClause = "";
+            var conditions = new List<string> { "1=1" };
             var param = new DynamicParameters();
 
             if (!string.IsNullOrWhiteSpace(keyword) && searchableColumns.Any())
             {
-                var conditions = searchableColumns.Select(col => $"{col} LIKE @keyword");
-
-                whereClause = $"({string.Join(" OR ", conditions)})";
-
+                var likes = searchableColumns.Select(col => $"{col} LIKE @keyword");
+                conditions.Add($"({string.Join(" OR ", likes)})");
                 param.Add("keyword", $"%{keyword}%");
-            } else
-            {
-                
             }
 
             // Xử lý filter động
-            if (filters != null && filters.Count > 0)
+            if (filters?.Count > 0)
             {
                 for (int i = 0; i < filters.Count; i++)
                 {
-                    var filter = filters[i];
-                    // Chuyển == thành = cho SQL, các toán tử khác giữ nguyên
-                    string op = filter.Operator == "==" ? "=" : filter.Operator;
-                    string paramName = $"f_param_{i}";
-
-                    object actualValue = GetValueFromJsonElement(filter.Value);
-
-                    whereClause += $" AND {filter.Field} {op} @{paramName}";
-                    param.Add(paramName, actualValue);
+                    string op = filters[i].Operator == "==" ? "=" : filters[i].Operator;
+                    string pName = $"f_param_{i}";
+                    conditions.Add($"{filters[i].Field} {op} @{pName}");
+                    param.Add(pName, GetValueFromJsonElement(filters[i].Value));
                 }
             }
+            var whereClause = string.Join(" AND ", conditions);
 
             var offSet = (pageIndex - 1) * pageSize;
             param.Add("offSet", offSet);
             param.Add("pageSize", pageSize);
 
             var sql = @$"SELECT COUNT(*) FROM {tableName} WHERE {whereClause};
-                        SELECT * FROM {tableName} WHERE {whereClause} LIMIT @pageSize OFFSET @offSet;";
+                        SELECT * FROM {tableName} WHERE {whereClause} ORDER BY CreatedDate DESC LIMIT @pageSize OFFSET @offSet;";
 
             using var  cnn = new MySqlConnection(connectionString);
             using var multi = await cnn.QueryMultipleAsync(

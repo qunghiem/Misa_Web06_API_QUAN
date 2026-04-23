@@ -42,6 +42,24 @@ namespace MISA_WEB06.Common.Model
         /// </summary>
         /// 
 
+        public string? PhoneNumber { get; set; }
+        public string? Email { get; set; }
+        public string? Country { get; set; }
+        public string? Province { get; set; }
+        public string? Ward { get; set; }
+        public string? Address { get; set; }
+        public string? CandidateSource { get; set; }
+        public string? RecentWorkplace { get; set; }
+        public string? Recruiter { get; set; }
+        public string? EducationLevel { get; set; }
+        public string? EducationPlace { get; set; }
+        public string? Major { get; set; }
+        public DateTime? Dob { get; set; }
+        public DateTime? ApplicationDate { get; set; }
+        public string? Avatar { get; set; }
+        public string? Cv { get; set; }
+
+
         public Employee()
         {
 
@@ -59,6 +77,8 @@ namespace MISA_WEB06.Common.Model
             EmployeeId = employeeId;
             EmployeeCode = employeeCode;
             EmployeeName = employeeName;
+
+
         }
     }
 }
